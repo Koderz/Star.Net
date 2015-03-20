@@ -64,7 +64,7 @@ namespace StarDotNet
         private static readonly Regex RegexPlayerAccount = new Regex(@"^\[PL\] SM-NAME: (?<accountName>.*)$", StarNetHelpersCommon.InternalRegexOptions);
 
         //[PL] IP: /123.123.123.123
-        private static readonly Regex RegexPlayerIp = new Regex(@"^\[PL\] IP: /(?<ipAddress>[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$", StarNetHelpersCommon.InternalRegexOptions);
+        private static readonly Regex RegexPlayerIp = new Regex(@"^\[PL\] IP: /?(?<ipAddress>(?:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})|null)$", StarNetHelpersCommon.InternalRegexOptions);
 
         //[PL] Name: Koderz
         private static readonly Regex RegexPlayerName = new Regex(@"^\[PL\] Name: (?<playerName>.*)$", StarNetHelpersCommon.InternalRegexOptions);
@@ -152,7 +152,8 @@ namespace StarDotNet
             // Get player ip
             match = RegexPlayerIp.Match(response[currentLine++]);
             StarNetHelpersCommon.ThrowUnexpectedResponseIfNotSuccess(match, "[PL] IP: /{{Account}}", response[currentLine - 1]);
-            playerInfo.LastIpAddress = IPAddress.Parse(match.Groups["ipAddress"].Value);
+            if (!match.Groups["ipAddress"].Value.Equals("null", StringComparison.InvariantCultureIgnoreCase))
+                playerInfo.LastIpAddress = IPAddress.Parse(match.Groups["ipAddress"].Value);
 
             // Get player name
             match = RegexPlayerName.Match(response[currentLine++]);

@@ -19,12 +19,12 @@ namespace StarDotNet.Tests
 
 
             // Get the server info and display
-            var serverInfo = StarNet.GetServerInfo(Address, Port);
+            StarNet.ServerInfo serverInfo = StarNet.GetServerInfo(Address, Port);
             Console.WriteLine("Server: [Version: {0}, Players: {1}/{2}]", serverInfo.Version, serverInfo.PlayerCount, serverInfo.MaxPlayers);
 
 
             // Execute the /status command as a raw command and desplay
-            var response = StarNet.ExecuteAdminCommand(Address, Port, Password, "/status");
+            string[] response = StarNet.ExecuteAdminCommand(Address, Port, Password, "/status");
             Console.WriteLine("/status");
             foreach(var line in response)
             {
@@ -41,13 +41,18 @@ namespace StarDotNet.Tests
                 // Get the player list and display
                 var playerList = session.PlayerList();
                 Console.WriteLine("Players:");
-                foreach(var player in playerList)
+                foreach (var player in playerList)
                 {
                     Console.Write(player + ", ");
                 }
                 Console.WriteLine();
                 Console.WriteLine();
+                
+                var playerInfo = session.PlayerInfo("Koderz");
+
+                Console.WriteLine(playerInfo);
             }
+
 
 
             Console.ReadLine();

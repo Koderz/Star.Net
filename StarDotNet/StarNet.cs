@@ -64,43 +64,12 @@ namespace StarDotNet
             }
         }
 
-        public class ServerInfo
-        {
-            public string Host { get; private set; }
-
-            public ushort Port { get; private set; }
-
-            public long RoundTripTime { get; private set; }
-
-            public sbyte InfoVersion { get; private set; }
-
-            public float Version { get; private set; }
-
-            public string Name { get; private set; }
-
-            public string Description { get; private set; }
-
-            public long StartTime { get; private set; }
-
-            public int PlayerCount { get; private set; }
-
-            public int MaxPlayers { get; private set; }
-
-            public ServerInfo(string host, ushort port, long roundTripTime, sbyte infoVersion, float version, string name, string description, long startTime, int playerCount, int maxPlayers)
-            {
-                Host = host;
-                Port = port;
-                RoundTripTime = roundTripTime;
-                InfoVersion = infoVersion;
-                Version = version;
-                Name = name;
-                Description = description;
-                StartTime = startTime;
-                PlayerCount = playerCount;
-                MaxPlayers = maxPlayers;
-            }
-        }
-
+        /// <summary>
+        /// Query the server to find out the current state
+        /// </summary>
+        /// <param name="host">The hostname of the server.</param>
+        /// <param name="port">The port of the server.</param>
+        /// <returns>Information about the server</returns>
         public static ServerInfo GetServerInfo(string host, ushort port)
         {
             // Create the client and connect to the server
@@ -111,7 +80,6 @@ namespace StarDotNet
 
                 using (var stream = client.GetStream())
                 {
-                    // Open the writer
                     using (var writer = new BinaryWriter(stream))
                     {
                         // Get the start time (Simple round trip time calculation)
@@ -129,7 +97,6 @@ namespace StarDotNet
                         // Flush the command (send it to the server)
                         writer.Flush();
 
-                        // Open the reader
                         using (var reader = new BinaryReader(client.GetStream()))
                         {
                             // Size of this part of the packet (don't really need to use it)
@@ -154,6 +121,76 @@ namespace StarDotNet
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Contains information about the current state of a server
+        /// </summary>
+        public class ServerInfo
+        {
+            /// <summary>
+            /// Hostname of the server
+            /// </summary>
+            public string Host { get; private set; }
+
+            /// <summary>
+            /// Port of the server
+            /// </summary>
+            public ushort Port { get; private set; }
+
+            /// <summary>
+            /// Round trip time to query the server
+            /// </summary>
+            public long RoundTripTime { get; private set; }
+
+            /// <summary>
+            /// ServerInfo version
+            /// </summary>
+            public sbyte InfoVersion { get; private set; }
+
+            /// <summary>
+            /// Server version
+            /// </summary>
+            public float Version { get; private set; }
+
+            /// <summary>
+            /// Name of the server (set in the server.cfg file)
+            /// </summary>
+            public string Name { get; private set; }
+
+            /// <summary>
+            /// Description of the server (set in the server.cfg file)
+            /// </summary>
+            public string Description { get; private set; }
+
+            /// <summary>
+            /// When the server was started as a unix timestamp
+            /// </summary>
+            public long StartTime { get; private set; }
+
+            /// <summary>
+            /// Current player count on the server
+            /// </summary>
+            public int PlayerCount { get; private set; }
+
+            /// <summary>
+            /// Max allowed players on the server
+            /// </summary>
+            public int MaxPlayers { get; private set; }
+
+            public ServerInfo(string host, ushort port, long roundTripTime, sbyte infoVersion, float version, string name, string description, long startTime, int playerCount, int maxPlayers)
+            {
+                Host = host;
+                Port = port;
+                RoundTripTime = roundTripTime;
+                InfoVersion = infoVersion;
+                Version = version;
+                Name = name;
+                Description = description;
+                StartTime = startTime;
+                PlayerCount = playerCount;
+                MaxPlayers = maxPlayers;
             }
         }
 
