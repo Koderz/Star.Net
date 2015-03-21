@@ -83,7 +83,7 @@ namespace StarDotNet
                 {
                     LoginTime = match.Groups["time"].Value,
                     IpAddress = IPAddress.Parse(match.Groups["ipAddress"].Value),
-                    StarMadeName = match.Groups["accountName"].Value,
+                    StarMadeName = match.Groups["accountName"].Value.ClearStringNull(),
                 });
 
                 // Increment the current line;
@@ -108,7 +108,7 @@ namespace StarDotNet
                     "[PL] CONTROLLING: {{ControllingType}}[{{ControllingID}}(0)]", response[currentLine - 1]);
                 playerInfo.ControllingId = match.Groups["controlling"].Value;
                 playerInfo.Controlling =
-                    (PlayerControlling) Enum.Parse(typeof (PlayerControlling), match.Groups["controllingType"].Value);
+                    (PlayerControlling)Enum.Parse(typeof(PlayerControlling), match.Groups["controllingType"].Value);
             }
 
             // Get player sector
@@ -122,13 +122,13 @@ namespace StarDotNet
             StarNetHelpersCommon.ThrowUnexpectedResponseIfNotSuccess(match,
                 "[PL] FACTION: Faction [id={{factionId}}, name={{factionName}}, description={{factionDescription}}, size: {{factionSize}}; FP: {{factionPoints}}]",
                 response[currentLine - 1]);
-            if (!match.Groups["faction"].Value.Equals("null", StringComparison.InvariantCultureIgnoreCase))
+            if (!match.Groups["faction"].Value.IsStringNull())
             {
                 playerInfo.Faction = new PlayerFaction
                 {
                     Id = int.Parse(match.Groups["factionId"].Value),
                     Name = match.Groups["factionName"].Value,
-                    Description = match.Groups["description"].Value,
+                    Description = match.Groups["description"].Value.ClearStringNull(),
                     Size = int.Parse(match.Groups["size"].Value),
                     FactionPoints = int.Parse(match.Groups["factionPoints"].Value)
                 };
@@ -147,12 +147,12 @@ namespace StarDotNet
             // Get StarMade Name
             match = RegexPlayerAccount.Match(response[currentLine++]);
             StarNetHelpersCommon.ThrowUnexpectedResponseIfNotSuccess(match, "[PL] SM-NAME: {{Account}}", response[currentLine - 1]);
-            playerInfo.StarMadeName = match.Groups["accountName"].Value;
+            playerInfo.StarMadeName = match.Groups["accountName"].Value.ClearStringNull();
 
             // Get player ip
             match = RegexPlayerIp.Match(response[currentLine++]);
             StarNetHelpersCommon.ThrowUnexpectedResponseIfNotSuccess(match, "[PL] IP: /{{Account}}", response[currentLine - 1]);
-            if (!match.Groups["ipAddress"].Value.Equals("null", StringComparison.InvariantCultureIgnoreCase))
+            if (!match.Groups["ipAddress"].Value.IsStringNull())
                 playerInfo.LastIpAddress = IPAddress.Parse(match.Groups["ipAddress"].Value);
 
             // Get player name
@@ -163,10 +163,14 @@ namespace StarDotNet
             return playerInfo;
         }
 
+        /// <summary>
+        /// Executes the /player_info command for a supplied player
+        /// </summary>
+        /// <returns>Information about the player or null if the player didn't exist</returns>
         public static PlayerInfo PlayerInfo(this StarNet.IStarNetSession session, string playerName)
         {
             // Get the command response
-            var response = session.ExecuteAdminCommand("/player_info " + playerName);
+            string[] response = session.ExecuteAdminCommand("/player_info " + playerName);
 
             // Make sure we got a response
             if (response == null || response.Length <= 0)
@@ -186,10 +190,14 @@ namespace StarDotNet
             return ParsePlayer(response, ref currentLine);
         }
 
+        /// <summary>
+        /// Executs the /player_list command and returns the list of players and information about each of them.
+        /// </summary>
+        /// <returns>List of players and their associated information</returns>
         public static PlayerInfo[] PlayerList(this StarNet.IStarNetSession session)
         {
             // Get the command response
-            var response = session.ExecuteAdminCommand("/player_list");
+            string[] response = session.ExecuteAdminCommand("/player_list");
 
             // Make sure we got a response
             if (response == null || response.Length <= 0)
@@ -287,6 +295,7 @@ namespace StarDotNet
     /// </summary>
     public enum PlayerControlling
     {
+        Unknown,
         PlayerCharacter,
         Ship,
         SpaceStation,

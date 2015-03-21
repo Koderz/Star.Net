@@ -45,7 +45,8 @@
     <Compile Include="StarNet.PlayerExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="StarNet.CommonTypes.cs" />
+    <Compile Include="StarNet.ServerExtensions.cs" />
+    <Compile Include="StarNet.TypesCommon.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

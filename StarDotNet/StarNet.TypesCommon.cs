@@ -41,6 +41,31 @@ namespace StarDotNet
                 throw new InvalidOperationException("Expected: " + expected + " | Got: " + got);
         }
 
+        public static bool IsStringNull(this string value)
+        {
+            if (value == null)
+                return true;
+
+            var trimmed = value.Trim();
+
+            return trimmed.Equals(string.Empty, StringComparison.InvariantCultureIgnoreCase) ||
+                   trimmed.Equals("null", StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public static string ClearStringNull(this string value)
+        {
+            if (value == null)
+                return null;
+
+            var trimmed = value.Trim();
+
+            if (trimmed.Equals(string.Empty, StringComparison.InvariantCultureIgnoreCase) ||
+                trimmed.Equals("null", StringComparison.InvariantCultureIgnoreCase))
+                return null;
+
+            return value;
+        }
+
         // Regex parts
         // (?<playerName>.*)
         // (?<accountName>.*)

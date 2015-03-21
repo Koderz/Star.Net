@@ -58,7 +58,7 @@ namespace StarDotNet
         public static string[] ExecuteAdminCommand(string host, int port, string password, string command)
         {
             // Open a session and return the response
-            using (var session = CreateSession(host, port, password))
+            using (IStarNetSession session = CreateSession(host, port, password))
             {
                 return session.ExecuteAdminCommand(command);
             }
@@ -109,7 +109,7 @@ namespace StarDotNet
                             Header.Read(reader);
 
                             // Read all the return values of this packet part
-                            var returnValues = ReadParameters(reader);
+                            object[] returnValues = ReadParameters(reader);
 
                             // Calculate the round trip time
                             DateTime end = DateTime.Now;
@@ -213,6 +213,11 @@ namespace StarDotNet
         /// </summary>
         public interface IStarNetSession : IDisposable
         {
+            /// <summary>
+            /// Executes an admin command against the connected server.
+            /// </summary>
+            /// <param name="command">The admin command to send (Example:  /player_list )</param>
+            /// <returns>Each line of the response</returns>
             string[] ExecuteAdminCommand(string command);
         }
 
