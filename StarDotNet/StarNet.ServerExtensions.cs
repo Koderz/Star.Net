@@ -22,6 +22,7 @@
 
 #endregion License
 
+#pragma warning disable 1591
 using System;
 using System.Text.RegularExpressions;
 
@@ -100,33 +101,36 @@ namespace StarDotNet
 
             return status;
         }
+    }
 
-        /// <summary>
-        /// Contains state information about a running server.
-        /// </summary>
-        public class ServerStatus
-        {
-            public int PhysicsInMemory { get; set; }
+    /// <summary>
+    /// Contains state information about a running server.
+    /// </summary>
+    [Serializable]
+    public class ServerStatus
+    {
+        public int PhysicsInMemory { get; set; }
 
-            public int Rep { get; set; }
+        public int Rep { get; set; }
 
-            public int TotalQueuedNTPackages { get; set; }
+        // ReSharper disable once InconsistentNaming
+        public int TotalQueuedNTPackages { get; set; }
 
-            public int NotEmptySegments { get; set; }
+        public int NotEmptySegments { get; set; }
 
-            public int FreeSegments { get; set; }
+        public int FreeSegments { get; set; }
 
-            public int LoadedObjects { get; set; }
+        public int LoadedObjects { get; set; }
 
-            public int CurrentPlayers { get; set; }
+        public int CurrentPlayers { get; set; }
 
-            public int MaxPlayers { get; set; }
+        public int MaxPlayers { get; set; }
 
-            public int MemoryFree { get; set; }
+        public int MemoryFree { get; set; }
 
-            public int MemoryTaken { get; set; }
+        public int MemoryTaken { get; set; }
 
-            public int MemoryTotal { get; set; }
-        }
+        public int MemoryTotal { get; set; }
     }
 }
+#pragma warning restore 1591

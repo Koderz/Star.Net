@@ -22,6 +22,7 @@
 
 #endregion License
 
+#pragma warning disable 1591
 using System;
 using System.Text.RegularExpressions;
 
@@ -46,7 +47,7 @@ namespace StarDotNet
             if (value == null)
                 return true;
 
-            var trimmed = value.Trim();
+            string trimmed = value.Trim();
 
             return trimmed.Equals(string.Empty, StringComparison.InvariantCultureIgnoreCase) ||
                    trimmed.Equals("null", StringComparison.InvariantCultureIgnoreCase);
@@ -57,7 +58,7 @@ namespace StarDotNet
             if (value == null)
                 return null;
 
-            var trimmed = value.Trim();
+            string trimmed = value.Trim();
 
             if (trimmed.Equals(string.Empty, StringComparison.InvariantCultureIgnoreCase) ||
                 trimmed.Equals("null", StringComparison.InvariantCultureIgnoreCase))
@@ -84,6 +85,7 @@ namespace StarDotNet
         }
     }
 
+    [Serializable]
     public struct Vector3<T>
     {
         public T X;
@@ -102,4 +104,27 @@ namespace StarDotNet
             return "[" + X + ", " + Y + ", " + Z + "]";
         }
     }
+
+    [Serializable]
+    public struct Vector4<T>
+    {
+        public T X;
+        public T Y;
+        public T Z;
+        public T W;
+
+        public Vector4(T x, T y, T z, T w)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            W = w;
+        }
+
+        public override string ToString()
+        {
+            return "[" + X + ", " + Y + ", " + Z + ", " + W + "]";
+        }
+    }
 }
+#pragma warning restore 1591

@@ -22,6 +22,7 @@
 
 #endregion License
 
+#pragma warning disable 1591
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -43,6 +44,33 @@ namespace StarDotNet
         /// Useful when the server is bound to a specific address. Any other time you can ignore this property.
         /// </remarks>
         public static IPAddress LocalBindIp = IPAddress.Any;
+
+        /// <summary>
+        /// Used to specify the timeouts for sending/receiving data.
+        /// </summary>
+        public static int SendReceiveTimeout = int.MaxValue;
+
+
+        public static string CreateFullEntityUid(EntityType type, string uid)
+        {
+            switch (type)
+            {
+                case EntityType.Asteroid:
+                    return "ENTITY_FLOATINGROCK_" + uid;
+                case EntityType.PlanetSegment:
+                    return "ENTITY_PLANET_" + uid;
+                case EntityType.Ship:
+                    return "ENTITY_SHIP_" + uid;
+                case EntityType.Shop:
+                    return "ENTITY_SHOP_" + uid;
+                case EntityType.SpaceStation:
+                    return "ENTITY_SPACESTATION_" + uid;
+                default:
+                    throw new ArgumentException("unknown type");
+            }
+        }
+
+
 
         /// <summary>
         /// Connects to the server and executes one admin command and then disconnects
@@ -75,11 +103,16 @@ namespace StarDotNet
             // Create the client and connect to the server
             using (var client = new TcpClient(new IPEndPoint(LocalBindIp, 0)))
             {
+                client.ReceiveTimeout = client.SendTimeout = SendReceiveTimeout;
+
                 // Open the connection
                 client.Connect(host, port);
-
-                using (var stream = client.GetStream())
+                
+                using (NetworkStream stream = client.GetStream())
                 {
+                    // Set the read timeout to keep from getting invite requests
+                    stream.ReadTimeout = stream.WriteTimeout = SendReceiveTimeout;
+
                     using (var writer = new BinaryWriter(stream))
                     {
                         // Get the start time (Simple round trip time calculation)
@@ -97,7 +130,7 @@ namespace StarDotNet
                         // Flush the command (send it to the server)
                         writer.Flush();
 
-                        using (var reader = new BinaryReader(client.GetStream()))
+                        using (var reader = new BinaryReader(stream))
                         {
                             // Size of this part of the packet (don't really need to use it)
                             reader.ReadInt32Be();
@@ -113,7 +146,7 @@ namespace StarDotNet
 
                             // Calculate the round trip time
                             DateTime end = DateTime.Now;
-                            var roundTripTime = (long)(end - started).TotalMilliseconds;
+                            long roundTripTime = (long)(end - started).TotalMilliseconds;
 
                             // Return the server info
                             return new ServerInfo(host, port, roundTripTime, (sbyte)returnValues[0], (float)returnValues[1], (string)returnValues[2], (string)returnValues[3],
@@ -127,6 +160,7 @@ namespace StarDotNet
         /// <summary>
         /// Contains information about the current state of a server
         /// </summary>
+        [Serializable]
         public class ServerInfo
         {
             /// <summary>
@@ -221,6 +255,7 @@ namespace StarDotNet
             string[] ExecuteAdminCommand(string command);
         }
 
+        [Serializable]
         private sealed class StarNetSession : IStarNetSession
         {
             // The reason for implementing idisposable even those there's not really anything to dispose
@@ -248,6 +283,9 @@ namespace StarDotNet
 
                     using (var stream = client.GetStream())
                     {
+                        // Set the read timeout to keep from getting invite requests
+                        stream.ReadTimeout = stream.WriteTimeout = SendReceiveTimeout;
+
                         // Open the writer
                         using (var writer = new BinaryWriter(stream))
                         {
@@ -335,7 +373,7 @@ namespace StarDotNet
 
             // Write each parameter in turn.
             // Type as a byte followed by the data
-            foreach (var t in attributes)
+            foreach (object t in attributes)
             {
                 switch (Type.GetTypeCode(t.GetType()))
                 {
@@ -533,17 +571,17 @@ namespace StarDotNet
         private static void WriteBe(this BinaryWriter writer, int value)
         {
             // Reverse the byte ordering
-            var temp = (int)((value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8 | (value & 0x00FF0000U) >> 8 | (value & 0xFF000000U) >> 24);
+            int temp = (int)((value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8 | (value & 0x00FF0000U) >> 8 | (value & 0xFF000000U) >> 24);
 
             writer.Write(temp);
         }
 
         private static void WriteBe(this BinaryWriter writer, long value)
         {
-            var val = (ulong)value;
+            ulong val = (ulong)value;
 
             // Reverse the byte ordering
-            var temp = (long)(
+            long temp = (long)(
                 (val & 0x00000000000000FFU) << 56 | (val & 0x000000000000FF00U) << 40 | (val & 0x0000000000FF0000U) << 24 | (val & 0x00000000FF000000U) << 8 |
                 (val & 0x000000FF00000000U) >> 8 | (val & 0x0000FF0000000000U) >> 24 | (val & 0x00FF000000000000U) >> 40 | (val & 0xFF00000000000000U) >> 56);
 
@@ -552,10 +590,10 @@ namespace StarDotNet
 
         private static unsafe void WriteBe(this BinaryWriter writer, float value)
         {
-            var val = *((uint*)&value);
+            uint val = *((uint*)&value);
 
             // Reverse the byte ordering
-            var temp = (int)((val & 0x000000FFU) << 24 | (val & 0x0000FF00U) << 8 | (val & 0x00FF0000U) >> 8 | (val & 0xFF000000U) >> 24);
+            int temp = (int)((val & 0x000000FFU) << 24 | (val & 0x0000FF00U) << 8 | (val & 0x00FF0000U) >> 8 | (val & 0xFF000000U) >> 24);
 
             writer.Write((float)temp);
         }
@@ -563,7 +601,7 @@ namespace StarDotNet
         private static void WriteBe(this BinaryWriter writer, short value)
         {
             // Reverse the byte ordering
-            var temp = (short)((value & 0x00FFU) << 8 | (value & 0xFF00U) >> 8);
+            short temp = (short)((value & 0x00FFU) << 8 | (value & 0xFF00U) >> 8);
 
             writer.Write(temp);
         }
@@ -588,7 +626,7 @@ namespace StarDotNet
 
         private static int ReadInt32Be(this BinaryReader reader)
         {
-            var value = reader.ReadInt32();
+            int value = reader.ReadInt32();
 
             // Reverse the byte ordering
             return (int)((value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8 | (value & 0x00FF0000U) >> 8 | (value & 0xFF000000U) >> 24);
@@ -596,7 +634,7 @@ namespace StarDotNet
 
         private static long ReadInt64Be(this BinaryReader reader)
         {
-            var val = (ulong)reader.ReadInt64();
+            ulong val = (ulong)reader.ReadInt64();
 
             // Reverse the byte ordering
             return (long)(
@@ -606,17 +644,17 @@ namespace StarDotNet
 
         private static unsafe float ReadSingleBe(this BinaryReader reader)
         {
-            var value = reader.ReadUInt32();
+            uint value = reader.ReadUInt32();
 
             // Reverse the byte ordering
-            var temp = ((value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8 | (value & 0x00FF0000U) >> 8 | (value & 0xFF000000U) >> 24);
+            uint temp = ((value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8 | (value & 0x00FF0000U) >> 8 | (value & 0xFF000000U) >> 24);
 
             return *((float*)&temp);
         }
 
         private static short ReadInt16Be(this BinaryReader reader)
         {
-            var value = (ushort)reader.ReadInt16();
+            ushort value = (ushort)reader.ReadInt16();
 
             // Reverse the byte ordering
             return (short)((value & 0x00FFU) << 8 | (value & 0xFF00U) >> 8);
@@ -626,14 +664,14 @@ namespace StarDotNet
         {
             int count = reader.ReadInt16Be();
 
-            var buffer = reader.ReadBytes(count);
+            byte[] buffer = reader.ReadBytes(count);
 
             return Encoding.UTF8.GetString(buffer);
         }
 
         private static sbyte[] ReadSBytes(this BinaryReader reader, int count)
         {
-            var temp = reader.ReadBytes(count);
+            byte[] temp = reader.ReadBytes(count);
 
             var copy = new sbyte[count];
 
@@ -645,3 +683,4 @@ namespace StarDotNet
         #endregion Reader/Writer Extensions
     }
 }
+#pragma warning restore 1591

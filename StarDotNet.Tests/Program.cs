@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlTypes;
 using System.IO;
 
 namespace StarDotNet.Tests
@@ -6,13 +7,16 @@ namespace StarDotNet.Tests
     internal class Program
     {
         // Connection info to use for testing.
-        private const string Address = "localhost";
-
+        private const string Address = "localhost:4242";
         private const ushort Port = 4242;
         private const string Password = "mypassword";
 
         private static void Main(string[] args)
         {
+            
+
+
+
             // Get the server info and display
             StarNet.ServerInfo serverInfo = StarNet.GetServerInfo(Address, Port);
             Console.WriteLine("Server: [Version: {0}, Players: {1}/{2}]", serverInfo.Version, serverInfo.PlayerCount, serverInfo.MaxPlayers);
@@ -52,6 +56,15 @@ namespace StarDotNet.Tests
                 // Test server status
                 var serverStatus = session.Status();
                 Console.WriteLine("Players [{0}/{1}]  Memory(Free/Taken/Total)[{2}, {3}, {4}]", serverStatus.CurrentPlayers, serverStatus.MaxPlayers, serverStatus.MemoryFree, serverStatus.MemoryTaken, serverStatus.MemoryTotal);
+
+
+                SectorInfo sectorInfo = session.GetSectorInfo(5, 5, 40);
+                Console.WriteLine("EntityCount: {0} Astronauts: {1}", sectorInfo.Entities.Length, sectorInfo.Astronauts.Length);
+
+                EntityInfoExtended entityInfo = session.GetEntityInfo(EntityType.SpaceStation, "SpawnStation");
+                Console.WriteLine("RealName: " + entityInfo.RealName + " BlockCount: " + entityInfo.BlockCount);
+
+
             }
 
             Console.ReadLine();

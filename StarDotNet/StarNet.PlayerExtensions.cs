@@ -22,6 +22,7 @@
 
 #endregion License
 
+#pragma warning disable 1591
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -46,13 +47,13 @@ namespace StarDotNet
         // [PL] CONTROLLING: PlayerCharacter[(ENTITY_PLAYERCHARACTER_Koderz)(2886)]
         // [PL] CONTROLLING: Ship[Koderz_1426799715759](15989)
         // [PL] CONTROLLING: Planet(903)[s894]Planet  (r35)[10000000hp]
-        private static readonly Regex RegexPlayerControlling = new Regex(@"^\[PL\] CONTROLLING: (?:(?<controllingType>SpaceStation|PlayerCharacter|Ship)\[\(?(?<controlling>[^\]\(\)]*)\)?(?:\([0-9]*\))?\](?:\([0-9]*\))?|(?<controllingType>Planet)\((?<controlling>[0-9]*)\)\[.*\]Planet\s*\(.*\)\[.*\])$", StarNetHelpersCommon.InternalRegexOptions);
+        private static readonly Regex RegexPlayerControlling = new Regex(@"^\[PL\] CONTROLLING: (?:(?:(?<controllingType>PlayerCharacter)\[\(ENTITY_PLAYERCHARACTER_(?<controlling>.*)\)\([0-9\-]*\)\])|(?:(?<controllingType>Ship)\[(?<controlling>.*)\]\([0-9\-]*\))|(?:(?<controllingType>SpaceStation)\[(?:ENTITY_SPACESTATION_)?(?<controlling>.*)\([0-9\-]*\)\])|(?:(?<controllingType>Planet)\([0-9\-]*\)\[.*\]Planet (?<controlling>.*) \(.*\)\[.*\]))$", StarNetHelpersCommon.InternalRegexOptions);
 
         //[PL] SECTOR: (5, 5, 40)
         private static readonly Regex RegexPlayerSector = new Regex(@"^\[PL\] SECTOR: \((?<xSector>[0-9\-]*), (?<ySector>[0-9\-]*), (?<zSector>[0-9\-]*)\)$", StarNetHelpersCommon.InternalRegexOptions);
 
         //[PL] FACTION: Faction [id=10000, name=Red Shift, description=The server faction that controls server owned zones/entities!, size: 5; FP: 2147483647]
-        private static readonly Regex RegexPlayerFaction = new Regex(@"^\[PL\] FACTION: (?<faction>(?:Faction \[id=(?<factionId>.*), name=(?<factionName>.*), description=(?<description>(?:.|\n|\r)*), size: (?<size>[0-9]*); FP: (?<factionPoints>[0-9]*)\])|null)$", StarNetHelpersCommon.InternalRegexOptions);
+        private static readonly Regex RegexPlayerFaction = new Regex(@"^\[PL\] FACTION: (?<faction>(?:Faction \[id=(?<factionId>.*), name=(?<factionName>.*), description=(?<description>(?:.|\n|\r)*), size: (?<size>[0-9]*); FP: (?<factionPoints>[0-9\-]*)\])|null)$", StarNetHelpersCommon.InternalRegexOptions);
 
         //[PL] CREDITS: 327025577
         private static readonly Regex RegexPlayerCredits = new Regex(@"^\[PL\] CREDITS: (?<credits>[0-9]*)$", StarNetHelpersCommon.InternalRegexOptions);
@@ -227,6 +228,7 @@ namespace StarDotNet
     /// <summary>
     /// Contains information about a player
     /// </summary>
+    [Serializable]
     public class PlayerInfo
     {
         /// <summary>
@@ -305,6 +307,7 @@ namespace StarDotNet
     /// <summary>
     /// Defines a player login including the time, ip address and starmade account
     /// </summary>
+    [Serializable]
     public class PlayerLogin
     {
         /// <summary>
@@ -331,6 +334,7 @@ namespace StarDotNet
     /// <summary>
     /// Contains information about a players faction
     /// </summary>
+    [Serializable]
     public class PlayerFaction
     {
         /// <summary>
@@ -365,3 +369,4 @@ namespace StarDotNet
         }
     }
 }
+#pragma warning restore 1591
